@@ -284,8 +284,8 @@ setup_kubernetes_nodes () {
     timeout=0
     until ( gcloud compute ssh --strict-host-key-checking=no "$node_name" --command="gcloud auth configure-docker --quiet" && \
          gcloud compute ssh --strict-host-key-checking=no "$node_name" --command="mkdir /tmp/turboboost/ || true" && \
-         gcloud compute scp --strict-host-key-checking=no --recurse ./templates/disable_turbo_boost.sh "$node_name:/tmp/turboboost/disable_turbo_boost.sh" && \
-         gcloud compute ssh --strict-host-key-checking=no "$node_name" --command="sudo apt-get install msr-tools && sudo modprobe msr && /tmp/turboboost/disable_turbo_boost.sh disable" ) < /dev/null >> "$logfile" 2>&1; do
+         gcloud compute scp --strict-host-key-checking=no --recurse ./templates/disable_turbo_boost.sh "$node_name:/tmp/turboboost/disable_turbo_boost.sh" ) < /dev/null >> "$logfile" 2>&1; do #&& \
+   #      gcloud compute ssh --strict-host-key-checking=no "$node_name" --command="sudo apt-get install msr-tools && sudo modprobe msr && /tmp/turboboost/disable_turbo_boost.sh disable" ) < /dev/null >> "$logfile" 2>&1; do
       timeout=$((timeout + 1))
       if (( timeout > 20 )); then
         echo_failure

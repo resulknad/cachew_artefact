@@ -10,7 +10,7 @@ import os
 
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
-os.environ['TF_CPP_MAX_VLOG_LEVEL'] = '1'
+os.environ['TF_CPP_MAX_VLOG_LEVEL'] = '3'
 
 import time
 
