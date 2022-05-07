@@ -21,8 +21,8 @@ from official.modeling import performance
 from official.staging.training import grad_utils
 from official.utils.flags import core as flags_core
 from official.vision.image_classification.resnet import common
-from official.vision.image_classification.resnet import imagenet_preprocessing
-from official.vision.image_classification.resnet import resnet_model
+from . import imagenet_preprocessing
+from . import resnet_model
 
 
 class ResnetRunnable(orbit.StandardTrainer, orbit.StandardEvaluator):
