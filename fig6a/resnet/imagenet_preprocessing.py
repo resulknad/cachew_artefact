@@ -1,6 +1,6 @@
 # Copyright 2021 The TensorFlow Authors. All Rights Reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed undr the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -468,7 +468,7 @@ def input_fn(is_training,
       cycle_length=10,
       num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
-  dataset = dataset.apply(tf.data.experimental.mark("source_cache"))
+#  dataset = dataset.apply(tf.data.experimental.mark("source_cache"))
 
   if is_training and training_dataset_cache:
     # Improve training performance when training data is in remote storage and
