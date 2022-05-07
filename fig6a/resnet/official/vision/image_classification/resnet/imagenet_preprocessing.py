@@ -463,7 +463,7 @@ def input_fn(is_training,
       cycle_length=10,
       num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
-  dataset = dataset.apply(tf.data.experimental.mark("source_cache"))
+#  dataset = dataset.apply(tf.data.experimental.mark("source_cache"))
 
   if is_training and training_dataset_cache:
     # Improve training performance when training data is in remote storage and
