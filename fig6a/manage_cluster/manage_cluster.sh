@@ -403,7 +403,7 @@ stop_tfdata_service () {
 install_dependencies () {
   pip3 install jinja2-cli > /dev/null 2>&1
   pip3 install yq > /dev/null 2>&1
-  pip3 install -r ../resnet/requirements.txt
+  pip3 install -r ../resnet/requirements.txt > /dev/null 2>&1
   [[ ! -d tmp/ ]] && mkdir -p tmp/
 }
 
