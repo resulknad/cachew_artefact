@@ -18,7 +18,7 @@ num_training_images=1281167 # ImageNet
 #num_training_images=100000 # Tiny ImageNet
 #num_training_images=4 # Test dataset
 
-num_gpus=4
+num_gpus=1
 per_gpu_batch_size=312
 batch_size=$(($per_gpu_batch_size * $num_gpus))
 steps_per_loop=$(($num_training_images / $batch_size + 1))
@@ -56,7 +56,7 @@ params+="--data_dir=$data_dir "
 params+="--model_dir=$model_dir "
 params+="--enable_checkpoint_and_export=$enable_checkpoint_and_export "
 params+="--single_l2_loss_op "
-params+="--verbosity=0 "
+params+="--verbosity=1 "
 #params+="--nouse_tf_function --nouse_tf_while_loop"
 
 
@@ -66,7 +66,7 @@ log_out="$HOME/logs/resnet50-$exp_name-$timestamp.txt"
 
 echo "Running experiment '$exp_name'"
 echo "Training model and piping output to $log_out ..."
-${cmd[@]} 2>&1 | tee $log_out
+${cmd[@]} #2>&1 | tee $log_out
 
 echo ""
 echo "Finished training!"
