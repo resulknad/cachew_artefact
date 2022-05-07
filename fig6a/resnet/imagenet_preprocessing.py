@@ -167,6 +167,7 @@ def process_record_dataset(dataset,
   if TAKE1_CACHE_REPEAT:
     dataset = dataset.take(1).cache().repeat()
 
+  print("actually ",DISPATCHER_IP,is_training)
   if DISPATCHER_IP is not None and is_training is True:
     print("Actually distributing")
     dataset = dataset.apply(tf.data.experimental.service.distribute(
