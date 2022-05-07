@@ -32,8 +32,8 @@ from official.utils.flags import core as flags_core
 from official.utils.misc import keras_utils
 from official.utils.misc import model_helpers
 from official.vision.image_classification.resnet import common
-from official.vision.image_classification.resnet import imagenet_preprocessing
-from official.vision.image_classification.resnet import resnet_runnable
+from . import imagenet_preprocessing
+from . import resnet_runnable
 
 flags.DEFINE_boolean(name='use_tf_function', default=True,
                      help='Wrap the train and test step inside a '
