@@ -38,9 +38,9 @@ echo_failure() {
 }
 
 programname=$0
-gluster_nodes=0
+gluster_nodes=1
 num_kubernetes_nodes=4
-num_tfdata_workers=1
+num_tfdata_workers=3
 nethz="dkluser"
 region="us-central1"
 zone="us-central1-a"
@@ -408,23 +408,23 @@ install_dependencies
 if [[ "$cmd" == "status" ]]; then
   #set -e
   check_gcloud_authenticated
- # check_gluster_up
- # check_gluster_mounted
+  check_gluster_up
+  check_gluster_mounted
   check_kubernetes
   check_tfdata_service_up
 elif [[ "$cmd" == "restart_service" ]]; then
   stop_tfdata_service
   deploy_tfdata_service
 elif [[ "$cmd" == "start" ]]; then
- # start_gluster
- # mount_glusterfs
+  start_gluster
+  mount_glusterfs
   stop_kubernetes
   start_kubernetes
- # setup_kubernetes_nodes
+  setup_kubernetes_nodes
   deploy_tfdata_service
 elif [[ "$cmd" == "stop" ]]; then
   stop_tfdata_service
- # umount_glusterfs
- # stop_gluster 
+  umount_glusterfs
+  stop_gluster 
   stop_kubernetes
 fi
