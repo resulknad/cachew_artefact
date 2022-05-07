@@ -11,10 +11,10 @@ mkdir -p ${log_dir}
 
 echo "Running experiments on ResNet..."
 scale=(1 2 3 4 5 6)
-base_dir=$(realpath ./resnet)
+base_dir=$(realpath ../resnet)
 executable="run_imageNet.sh"
 preprocessing_source="imagenet_preprocessing.py"
-service_loc=$(realpath ./)
+service_loc=$(realpath ../manage_cluster)
 
 # Dump some organizational stats
 (
