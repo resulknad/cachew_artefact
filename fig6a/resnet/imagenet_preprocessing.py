@@ -169,7 +169,7 @@ def process_record_dataset(dataset,
     dataset = dataset.apply(tf.data.experimental.service.distribute(
       processing_mode="distributed_epoch", service="grpc://" + DISPATCHER_IP + ":31000",
                                 job_name="JobName",
-      max_outstanding_requests=16, max_request_pipelining_per_worker=2, compression=None
+      max_outstanding_requests=16, max_request_pipelining_per_worker=2
     ))
     # dataset = dataset.repeat()
 
