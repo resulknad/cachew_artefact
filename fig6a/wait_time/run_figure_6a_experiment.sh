@@ -72,7 +72,7 @@ function start_cluster {(
 
   echo "Deploying service with ${workers} workers..."
   sed "s/cache_policy:[ \t]\+[0-9]\+/cache_policy: $cache_policy/g" "${service_loc}/default_config.yaml" > ${service_loc}/temp_config.yaml
-  ./manage_cluster.sh restart_service -n ${workers} -f ${service_loc}/temp_config.yaml
+  ./manage_cluster.sh restart_service -w ${workers} -f ${service_loc}/temp_config.yaml
   echo "Done deploying service!"
 )}
 
