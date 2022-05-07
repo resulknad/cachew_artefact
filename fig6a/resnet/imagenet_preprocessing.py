@@ -131,7 +131,6 @@ def process_record_dataset(dataset,
   Returns:
     Dataset of (image, label) pairs ready for iteration.
   """
-  logging.info("process record ingo ",DISPATCHER_IP,is_training)
   # Defines a specific size thread pool for tf.data operations.
   if datasets_num_private_threads:
     options = tf.data.Options()
