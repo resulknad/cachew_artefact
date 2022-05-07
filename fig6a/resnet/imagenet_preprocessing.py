@@ -50,7 +50,7 @@ _SHUFFLE_BUFFER = 10000
 DATA_AUGM_REPEAT = None # None for no repetition
 CACHE_DIR="/training-data/cache_temp"
 CACHE_PARALLELISM = 16
-DISPATCHER_IP=None
+DISPATCHER_IP="1"
 TAKE1_CACHE_REPEAT=False
 
 if DATASET == "ImageNet":
