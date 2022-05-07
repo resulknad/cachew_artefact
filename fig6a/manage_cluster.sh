@@ -54,6 +54,7 @@ function usage {
     echo "starts/terminates whole cluster"
     echo "  -f [Cachew service config yaml]"
     echo "  -n [nethz ID]"
+    echo "  -w [number of Cachew workers]"
     exit 1
 }
 
@@ -65,7 +66,7 @@ if [[ "$cmd" != "start" ]] && [[ "$cmd" != "stop" ]] && [[ "$cmd" != "status" ]]
     exit 1
 fi
 
-while getopts "h?g:n:f:" opt; do
+while getopts "h?g:n:f:w:" opt; do
   case "$opt" in
     h|\?)
       usage
@@ -73,6 +74,8 @@ while getopts "h?g:n:f:" opt; do
     f)  service_config_yaml=$OPTARG
       ;;
     g)  gluster_nodes=$OPTARG
+      ;;
+    w)  num_tfdata_workers=$OPTARG
       ;;
     n)  nethz=$OPTARG
       ;;
@@ -420,7 +423,7 @@ elif [[ "$cmd" == "start" ]]; then
   mount_glusterfs
   stop_kubernetes
   start_kubernetes
-  setup_kubernetes_nodes
+  #setup_kubernetes_nodes
   deploy_tfdata_service
 elif [[ "$cmd" == "stop" ]]; then
   stop_tfdata_service

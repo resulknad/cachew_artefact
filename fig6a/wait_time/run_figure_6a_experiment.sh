@@ -11,10 +11,10 @@ mkdir -p ${log_dir}
 
 echo "Running experiments on ResNet..."
 scale=(1 2 3 4 5 6)
-base_dir="${HOME}/../jupyter/service/ml_input_processing/experiments/ml/models/official/vision/image_classification/resnet"
+base_dir=$(realpath ./resnet)
 executable="run_imageNet.sh"
 preprocessing_source="imagenet_preprocessing.py"
-service_loc="${HOME}/../jupyter/service/easl-utils/tf-data/service"
+service_loc=$(realpath ./)
 
 # Dump some organizational stats
 (
@@ -60,7 +60,8 @@ function run_one {(
 
   # Restart the cluster
   echo "Restarting service..."
-  python ${service_loc}/service_deploy.py --config=${config_name} --restart
+  ./manage_cluster.sh restart_service -n ${scale} -f ${config_name}
+  # python ${service_loc}/service_deploy.py --config=${config_name} --restart
   echo "Service restarted!"
 )}
 
@@ -70,9 +71,8 @@ function start_cluster {(
   local cache_policy=${2}
 
   echo "Deploying service with ${workers} workers..."
-  sed "s/num_workers:[ \t]\+[0-9]\+/num_workers: $workers/g" "${service_loc}/default_config.yaml" \
-    | sed "s/cache_policy:[ \t]\+[0-9]\+/cache_policy: $cache_policy/g" > ${service_loc}/temp_config.yaml
-  python ${service_loc}/service_deploy.py --config=${service_loc}/temp_config.yaml
+  sed "s/cache_policy:[ \t]\+[0-9]\+/cache_policy: $cache_policy/g" "${service_loc}/default_config.yaml" > ${service_loc}/temp_config.yaml
+  ./manage_cluster.sh restart_service -n ${workers} -f ${service_loc}/temp_config.yaml
   echo "Done deploying service!"
 )}
 
@@ -90,11 +90,6 @@ function terminate_cluster {(
     node_name=$( echo ${line} | awk '{print $1}' )
     kubectl describe nodes ${node_name} > ${cluster_log_dir}/${node_name}_describe.txt
   done
-
-  # Stop the service
-  echo "Tearing down service..."
-  python ${service_loc}/service_deploy.py --config=${service_loc}/temp_config.yaml --stop
-  echo "Service torn down!"
 )}
 
 # Define a function which updates the dispatcher IP in the pre-processing scripts
@@ -117,32 +112,6 @@ function run_many {(
   current_dir=$( pwd )
   cd ${service_loc}
 
-  # If the mode is cache, we need to first cache the data
-  if [ "${mode}" == "cache" ]; then
-    echo "Writing the data to cache"
-    start_cluster "${cache_worker_count}" "30"
-    update_dispatcher
-
-    run_one "1" "cache_dump" "${service_loc}/temp_config.yaml"
-
-    terminate_cluster "cache_dump"
-    echo "Finished writing data to cache"
-
-    # Set the cache_policy for the actual experiments
-    cache_policy=31
-  elif [ "${mode}" == "source_cache" ]; then
-    echo "Writing source data to cache"
-    start_cluster "${cache_worker_count}" "40"
-    update_dispatcher
-
-    run_one "1" "source_cache_dump" "${service_loc}/temp_config.yaml"
-    terminate_cluster "source_cache_dump"
-    echo "Finished writing source data to cache"
-
-    # Set the cahce_policy for the actual experiments
-    cache_policy=41
-  fi
-
   # Start the experiments
   for i in "${scale[@]}"; do
     start_cluster "${i}" "${cache_policy}"
@@ -152,7 +121,7 @@ function run_many {(
       run_one "${j}" "${i}" "${service_loc}/temp_config.yaml"
     done
 
-    terminate_cluster "${i}"
+#    terminate_cluster "${i}"
   done
 
   # Move to dir before call to avoid side effects
