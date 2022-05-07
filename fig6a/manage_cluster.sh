@@ -327,7 +327,7 @@ deploy_tfdata_service () {
   done
   echo_success
 
-  echo -n "Deploying tf-data service..."
+  echo -n "Deploying Cachew service..."
   if [[ ! -f "$service_config_yaml" ]]; then
     echo_failure
 
@@ -337,7 +337,7 @@ deploy_tfdata_service () {
   readarray -t worker_names_array <<<"$kube_worker_names"
   
   num_kube_workers=$(echo "$kube_worker_names" | wc -l)
-  if [[ "$num_kube_workers"  != "$num_tfdata_workers" ]]; then
+  if (( num_kube_workers  < num_tfdata_workers )); then
     echo "number of kube workers ($num_kube_workers) and tf data workers ($num_tfdata_workers) does not match." >> "$logfile"
     echo_failure
     return 1
