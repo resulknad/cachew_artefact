@@ -1,6 +1,6 @@
 # Copyright 2021 The TensorFlow Authors. All Rights Reserved.
 #
-# Licensed undr the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -50,8 +50,8 @@ _SHUFFLE_BUFFER = 10000
 DATA_AUGM_REPEAT = None # None for no repetition
 CACHE_DIR="/training-data/cache_temp"
 CACHE_PARALLELISM = 16
-DISPATCHER_IP="1"
-TAKE1_CACHE_REPEAT=False
+DISPATCHER_IP='graurd-cachew-dispatcher-bs55'
+TAKE1_CACHE_REPEAT = False
 
 if DATASET == "ImageNet":
   DEFAULT_IMAGE_SIZE = 224
@@ -61,7 +61,6 @@ if DATASET == "ImageNet":
     'validation': 50000,
   }
   _NUM_TRAIN_FILES = 1024
-  _NUM_FILES_TO_READ = 1024 
   _NUM_VAL_FILES = 128
   _RESIZE_MIN = 256
 
@@ -141,13 +140,12 @@ def process_record_dataset(dataset,
                  datasets_num_private_threads)
 
   # Shuffles records before repeating to respect epoch boundaries.
-  # dataset = dataset.shuffle(buffer_size=shuffle_buffer)
+  #dataset = dataset.shuffle(buffer_size=shuffle_buffer)
     
-  if dataset_repeat and is_training and not TAKE1_CACHE_REPEAT \
-    and DATA_AUGM_REPEAT is None and DISPATCHER_IP is None:
-    # Repeats the dataset for the number of epochs to train.
-    #dataset = dataset.repeat()
-    pass
+  # if dataset_repeat and is_training and not TAKE1_CACHE_REPEAT \
+  #   and DATA_AUGM_REPEAT is None and DISPATCHER_IP is None:
+  #   # Repeats the dataset for the number of epochs to train.
+  #   dataset = dataset.repeat()
 
   # Parses the raw records into images and labels.
   dataset = dataset.map(
@@ -168,84 +166,83 @@ def process_record_dataset(dataset,
     dataset = dataset.take(1).cache().repeat()
 
   if DISPATCHER_IP is not None and is_training is True:
-    print("Actually distributing")
     dataset = dataset.apply(tf.data.experimental.service.distribute(
       processing_mode="distributed_epoch", service="grpc://" + DISPATCHER_IP + ":31000",
-                                job_name="ResnetPreProcessing",
+                                job_name="JobName",
       max_outstanding_requests=16, max_request_pipelining_per_worker=2, compression=None
     ))
-    dataset = dataset.repeat()
+    # dataset = dataset.repeat()
 
-  if is_training and DATA_AUGM_REPEAT is not None:
-    snapshot_path = CACHE_DIR+"/snapshot_{:03d}"
-    
-    # Standard periodic caching
-    #for ep in range(3):
-    #    d = dataset.apply(tf.data.experimental.snapshot(snapshot_path.format(ep)))
-    #    d = d.repeat(DATA_AUGM_REPEAT)
-    #    if ep == 0:
-    #        dataset_snapshot = d
-    #    else:
-    #        dataset_snapshot = dataset_snapshot.concatenate(d)
-    #
-    #dataset = dataset_snapshot.repeat()
-    
-    # Periodic caching using tf.data.experimental.service_cache_put
-    cache_format=2
-    cache_compression=1
-    dataset = dataset.apply(tf.data.experimental.service_cache_put(CACHE_DIR,
-                                                                   cache_format=cache_format,
-                                                                   cache_compression=cache_compression,
-                                                                   parallelism=CACHE_PARALLELISM))
-    element_spec = dataset.element_spec
-    cached_dataset = tf.data.experimental.serviceCacheGetDataset(CACHE_DIR,
-                                                                 cache_format=cache_format,
-                                                                 cache_compression=cache_compression,
-                                                                 parallelism=CACHE_PARALLELISM,
-                                                                 element_spec=element_spec)
-    #cached_dataset=cached_dataset.shuffle(buffer_size=shuffle_buffer)
-    cached_dataset = cached_dataset.repeat(DATA_AUGM_REPEAT-1)
-    
-    dataset = dataset.concatenate(cached_dataset)
-    dataset = dataset.repeat()
-    
-    
-    #Partial periodic caching
-    #cache_ratio = 0.5
-    #nb_batches_to_cache = int(cache_ratio * NUM_IMAGES['train'] / batch_size)
-    #for i in range(3):
-    #    cache_dataset = dataset.take(nb_batches_to_cache)    
-    #    fresh_dataset = dataset.skip(nb_batches_to_cache)
-    #    cache_dataset = cache_dataset.apply(tf.data.experimental.snapshot(snapshot_path.format(i)))
-    #    
-    #    #d = cache_dataset.concatenate(fresh_dataset)
-    #    weights = [cache_ratio, 1-cache_ratio]
-    #    d = tf.data.experimental.sample_from_datasets([cache_dataset, fresh_dataset], weights, seed=None)
-    #    
-    #    d = d.repeat(DATA_AUGM_REPEAT)
-    #    if i == 0:
-    #        dataset_snapshot = d
-    #    else:
-    #        dataset_snapshot = dataset_snapshot.concatenate(d)
-    #
-    #dataset = dataset_snapshot.repeat()
-    
-    # Adaptive periodic caching (hard-coded for 6-3-1 caching periods with boundaries at epochs [30, 60])
-    #for snap_nb in range(30//6):
-    #    d = dataset.apply(tf.data.experimental.snapshot(snapshot_path.format(snap_nb%3)))
-    #    d = d.repeat(6)
-    #    if snap_nb == 0:
-    #        dataset_snapshot = d
-    #    else:
-    #        dataset_snapshot = dataset_snapshot.concatenate(d)
-    #
-    #for snap_nb in range(30//6, 30//6 + (60-30)//3):
-    #    d = dataset.apply(tf.data.experimental.snapshot(snapshot_path.format(snap_nb%3)))
-    #    d = d.repeat(3)
-    #    dataset_snapshot = dataset_snapshot.concatenate(d)
-    #
-    #d = dataset.repeat()
-    #dataset = dataset_snapshot.concatenate(d)
+  # if is_training and DATA_AUGM_REPEAT is not None:
+  #   snapshot_path = CACHE_DIR+"/snapshot_{:03d}"
+  #
+  #   # Standard periodic caching
+  #   #for ep in range(3):
+  #   #    d = dataset.apply(tf.data.experimental.snapshot(snapshot_path.format(ep)))
+  #   #    d = d.repeat(DATA_AUGM_REPEAT)
+  #   #    if ep == 0:
+  #   #        dataset_snapshot = d
+  #   #    else:
+  #   #        dataset_snapshot = dataset_snapshot.concatenate(d)
+  #   #
+  #   #dataset = dataset_snapshot.repeat()
+  #
+  #   # Periodic caching using tf.data.experimental.service_cache_put
+  #   cache_format=2
+  #   cache_compression=1
+  #   dataset = dataset.apply(tf.data.experimental.service_cache_put(CACHE_DIR,
+  #                                                                  cache_format=cache_format,
+  #                                                                  cache_compression=cache_compression,
+  #                                                                  parallelism=CACHE_PARALLELISM))
+  #   element_spec = dataset.element_spec
+  #   cached_dataset = tf.data.experimental.serviceCacheGetDataset(CACHE_DIR,
+  #                                                                cache_format=cache_format,
+  #                                                                cache_compression=cache_compression,
+  #                                                                parallelism=CACHE_PARALLELISM,
+  #                                                                element_spec=element_spec)
+  #   #cached_dataset=cached_dataset.shuffle(buffer_size=shuffle_buffer)
+  #   cached_dataset = cached_dataset.repeat(DATA_AUGM_REPEAT-1)
+  #
+  #   dataset = dataset.concatenate(cached_dataset)
+  #   dataset = dataset.repeat()
+  #
+  #
+  #   #Partial periodic caching
+  #   #cache_ratio = 0.5
+  #   #nb_batches_to_cache = int(cache_ratio * NUM_IMAGES['train'] / batch_size)
+  #   #for i in range(3):
+  #   #    cache_dataset = dataset.take(nb_batches_to_cache)
+  #   #    fresh_dataset = dataset.skip(nb_batches_to_cache)
+  #   #    cache_dataset = cache_dataset.apply(tf.data.experimental.snapshot(snapshot_path.format(i)))
+  #   #
+  #   #    #d = cache_dataset.concatenate(fresh_dataset)
+  #   #    weights = [cache_ratio, 1-cache_ratio]
+  #   #    d = tf.data.experimental.sample_from_datasets([cache_dataset, fresh_dataset], weights, seed=None)
+  #   #
+  #   #    d = d.repeat(DATA_AUGM_REPEAT)
+  #   #    if i == 0:
+  #   #        dataset_snapshot = d
+  #   #    else:
+  #   #        dataset_snapshot = dataset_snapshot.concatenate(d)
+  #   #
+  #   #dataset = dataset_snapshot.repeat()
+  #
+  #   # Adaptive periodic caching (hard-coded for 6-3-1 caching periods with boundaries at epochs [30, 60])
+  #   #for snap_nb in range(30//6):
+  #   #    d = dataset.apply(tf.data.experimental.snapshot(snapshot_path.format(snap_nb%3)))
+  #   #    d = d.repeat(6)
+  #   #    if snap_nb == 0:
+  #   #        dataset_snapshot = d
+  #   #    else:
+  #   #        dataset_snapshot = dataset_snapshot.concatenate(d)
+  #   #
+  #   #for snap_nb in range(30//6, 30//6 + (60-30)//3):
+  #   #    d = dataset.apply(tf.data.experimental.snapshot(snapshot_path.format(snap_nb%3)))
+  #   #    d = d.repeat(3)
+  #   #    dataset_snapshot = dataset_snapshot.concatenate(d)
+  #   #
+  #   #d = dataset.repeat()
+  #   #dataset = dataset_snapshot.concatenate(d)
 
   options = tf.data.Options()
   options.experimental_slack = tf_data_experimental_slack
@@ -256,17 +253,16 @@ def process_record_dataset(dataset,
 
 def get_filenames(is_training, data_dir):
   """Return filenames for dataset."""
-  print("get files")
   if is_training:
     return [
         os.path.join(data_dir, f"train/train-{i:05d}-of-{_NUM_TRAIN_FILES:05d}")
-        for i in range(_NUM_FILES_TO_READ)
-        ]
+        for i in range(_NUM_TRAIN_FILES)
+    ]
   else:
     return [
         os.path.join(data_dir, f"validation/validation-{i:05d}-of-{_NUM_VAL_FILES:05d}")
         for i in range(_NUM_VAL_FILES)
-        ]
+    ]
 
 
 def parse_example_proto(example_serialized):
@@ -416,7 +412,6 @@ def input_fn(is_training,
              training_dataset_cache=False,
              filenames=None,
              dataset_repeat=True):
-  logging.info("DBK input_fn ")
   """Input function which provides batches for train or eval.
 
   Args:
@@ -447,15 +442,15 @@ def input_fn(is_training,
 
   if input_context:
     logging.info(
-        'DBK!! Sharding the dataset: input_pipeline_id=%d num_input_pipelines=%d',
+        'Sharding the dataset: input_pipeline_id=%d num_input_pipelines=%d',
         input_context.input_pipeline_id, input_context.num_input_pipelines)
     dataset = dataset.shard(input_context.num_input_pipelines,
                             input_context.input_pipeline_id)
 
   if is_training:
-    pass
     # Shuffle the input files
     #dataset = dataset.shuffle(buffer_size=_NUM_TRAIN_FILES)
+    pass
 
   # Convert to individual records.
   # cycle_length = 10 means that up to 10 files will be read and deserialized in
@@ -466,7 +461,7 @@ def input_fn(is_training,
       cycle_length=10,
       num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
-#  dataset = dataset.apply(tf.data.experimental.mark("source_cache"))
+  dataset = dataset.apply(tf.data.experimental.mark("source_cache"))
 
   if is_training and training_dataset_cache:
     # Improve training performance when training data is in remote storage and

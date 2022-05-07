@@ -18,6 +18,13 @@ from orbit.utils import tpu_summaries
 
 import tensorflow as tf
 
+import os
+import time
+
+
+EXP_PATH = "/mnt/disks/data/sources/model_experiments/ml_input_processing/experiments/ml/models/official/vision/image_classification/resnet"
+LOG_FILE = "model_event_log.log"
+
 
 def create_loop_fn(step_fn):
   """Creates a loop function driven by a Python `while` loop.
@@ -34,7 +41,6 @@ def create_loop_fn(step_fn):
     over multiple iterations of the loop. See the `loop_fn` definition below for
     additional details.
   """
-
   def loop_fn(iterator, num_steps, state=None, reduce_fn=None):
     """Makes `num_steps` calls to `step_fn(iterator)`.
 
@@ -65,16 +71,36 @@ def create_loop_fn(step_fn):
       The final state returned by `reduce_fn`, or `None` if `state` and
       `reduce_fn` are not provided.
     """
+
+    def _write_to_file(value):
+      timestamp = time.time() * 10 ** 6
+      file_path = os.path.join(EXP_PATH, LOG_FILE)
+      write_header = not os.path.exists(file_path)
+      with open(file_path, "a+") as f:
+        if write_header:
+          f.write(f"time,event\n")
+        f.write(f"{timestamp},{value}\n")
+
     try:
       step = 0
+      count = 0
       # To make sure the OutOfRangeError exception can be handled well under
       # async remote eager, we need to wrap the loop body in `async_scope`.
       with tf.experimental.async_scope():
+        tf.print(f"######## Starting an epoch. Number of target steps: {num_steps}")
         while num_steps == -1 or step < num_steps:
+          # if count == 0:
+          #   _write_to_file("epoch_begin")
           outputs = step_fn(iterator)
+          count += 1
+          # if count >= 4107:
+          #   count = 0
+          #   _write_to_file("epoch_end")
+
           if reduce_fn is not None:
             state = reduce_fn(state, outputs)
           step += 1
+        tf.print(f"######## Number of steps done in this epoch: {count}")
         return state
     except (StopIteration, tf.errors.OutOfRangeError):
       tf.experimental.async_clear_error()
@@ -96,7 +122,6 @@ def create_tf_while_loop_fn(step_fn):
     a `tf.while_loop` construct. See the `loop_fn` definition below for
     additional details.
   """
-
   def loop_fn(iterator, num_steps):
     """Makes `num_steps` calls to `step_fn(iterator)`.
 
@@ -111,11 +136,13 @@ def create_tf_while_loop_fn(step_fn):
           "`num_steps` should be a `tf.Tensor`. Passing a Python value can "
           "cause unnecessary retracing when wrapped by `tf.function`.")
 
-    for _ in tf.range(num_steps):
+    tf.print(
+      f"########################################################## num_steps: {num_steps}")
+    for data in iterator:
       # Clear out the outer name scope so the ops created inside `tf.while_loop`
       # don't get "while/" as name prefix.
       with tf.name_scope(""):
-        step_fn(iterator)
+        step_fn(data)
 
   return loop_fn
 
@@ -137,7 +164,6 @@ def create_tf_while_loop_fn_with_state(step_fn):
     converted by AutoGraph into a `tf.while_loop` construct. See the `loop_fn`
     definition below for additional details.
   """
-
   def loop_fn_with_state(iterator, num_steps, state, reduce_fn):
     """Makes `num_steps` calls to `step_fn(iterator)`.
 
