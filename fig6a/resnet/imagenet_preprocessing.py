@@ -257,16 +257,17 @@ def process_record_dataset(dataset,
 
 def get_filenames(is_training, data_dir):
   """Return filenames for dataset."""
+  print("get files")
   if is_training:
     return [
         os.path.join(data_dir, f"train/train-{i:05d}-of-{_NUM_TRAIN_FILES:05d}")
         for i in range(_NUM_FILES_TO_READ)
-        ][:10]
+        ]
   else:
     return [
         os.path.join(data_dir, f"validation/validation-{i:05d}-of-{_NUM_VAL_FILES:05d}")
         for i in range(_NUM_VAL_FILES)
-        ][:10]
+        ]
 
 
 def parse_example_proto(example_serialized):
