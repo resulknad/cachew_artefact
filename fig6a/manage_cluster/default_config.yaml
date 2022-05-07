@@ -14,14 +14,14 @@ cache_path: "./gluster/cache"
 # Specifies whether to enable log dumps at dispatcher.
 # Will automatically set the log_dir param of the dispatcher and copy logs into meta/path_to_logs/..
 # Only valid for local-service and kubernetes-service deployment.
-log_dumps: true
+log_dumps: false
 log_dir: "./gluster/logs" # Will be set by the exp script. We use the log_dumps param to decide on this.
 log_dumps_interval_ms: 5000 # Only valid if log_dumps is true.
 
 # Used for worker
 worker_heartbeat_interval_ms: 5000 # The heartbeat interval between worker and dispatcher, in ms.
 
-nightly: False
+nightly: false
 nethz: "dkluser" # TODO update this!
 checkpoint_dir: "./gluster/checkpoints" # TODO update this!
 checkpoint_freq_ms: 999000
