@@ -28,7 +28,7 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-from official.vision.image_classification.resnet import imagenet_preprocessing
+import imagenet_preprocessing
 
 layers = tf.keras.layers
 

@@ -56,7 +56,7 @@ params+="--data_dir=$data_dir "
 params+="--model_dir=$model_dir "
 params+="--enable_checkpoint_and_export=$enable_checkpoint_and_export "
 params+="--single_l2_loss_op "
-params+="--verbosity=0 "
+params+="--verbosity=1 "
 #params+="--nouse_tf_function --nouse_tf_while_loop"
 
 
