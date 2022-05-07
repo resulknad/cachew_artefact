@@ -32,8 +32,6 @@ def test(global_cfg, exp_cfg):
     print("Testing")
     deployment_utils.get_service_logs(global_cfg, exp_cfg)
     time.sleep(10)
-
-
     print("Done")
 
   
