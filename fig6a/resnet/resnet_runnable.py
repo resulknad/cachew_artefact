@@ -33,6 +33,7 @@ class ResnetRunnable(orbit.StandardTrainer, orbit.StandardEvaluator):
     self.flags_obj = flags_obj
     self.dtype = flags_core.get_tf_dtype(flags_obj)
     self.time_callback = time_callback
+    print("DBK init resnset runnable ")
 
     # Input pipeline related
     batch_size = flags_obj.batch_size
@@ -58,6 +59,7 @@ class ResnetRunnable(orbit.StandardTrainer, orbit.StandardEvaluator):
     else:
       self.input_fn = imagenet_preprocessing.input_fn
 
+    print("DBK input fn ", self.input_fn)
     self.model = resnet_model.resnet50(
         num_classes=imagenet_preprocessing.NUM_CLASSES,
         use_l2_regularizer=not flags_obj.single_l2_loss_op)
