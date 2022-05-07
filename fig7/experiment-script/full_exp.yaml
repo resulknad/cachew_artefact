@@ -1,7 +1,7 @@
 experiment:
   meta:
     name: "caching_decision_inflate_2.5_b900_redo"
-    path_to_log: /home/dkluser/managecluster/experiment_out
+    path_to_log: /home/dkluser/cachew_artefact/fig7/experiment_out
     gluster_conf:
     kubernetes:
       dispatcher: "n2-16"
