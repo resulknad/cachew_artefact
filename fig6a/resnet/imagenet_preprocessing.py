@@ -50,7 +50,6 @@ _SHUFFLE_BUFFER = 10000
 DATA_AUGM_REPEAT = None # None for no repetition
 CACHE_DIR="/training-data/cache_temp"
 CACHE_PARALLELISM = 16
-#DISPATCHER_IP='talbrici-cachew-dispatcher-5gr3'
 DISPATCHER_IP=None
 TAKE1_CACHE_REPEAT=False
 
@@ -171,6 +170,7 @@ def process_record_dataset(dataset,
   if DISPATCHER_IP is not None and is_training is True:
     dataset = dataset.apply(tf.data.experimental.service.distribute(
       processing_mode="distributed_epoch", service="grpc://" + DISPATCHER_IP + ":31000",
+                                job_name="ResnetPreProcessing",
       max_outstanding_requests=16, max_request_pipelining_per_worker=2, compression=None
     ))
     dataset = dataset.repeat()
