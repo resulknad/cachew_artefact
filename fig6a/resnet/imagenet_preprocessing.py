@@ -418,6 +418,7 @@ def input_fn(is_training,
              training_dataset_cache=False,
              filenames=None,
              dataset_repeat=True):
+  logging.info("DBK input_fn ")
   """Input function which provides batches for train or eval.
 
   Args:
