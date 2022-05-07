@@ -10,7 +10,7 @@ data_dir="gs://tfdata-imagenet" # ImageNet from GCS
 #data_dir="/training-data/imagenet-tiny/tfrecords" # Tiny
 #data_dir="/training-data/imagenet_test/tfrecords" # Test dataset with 4 images
 
-epochs=90
+epochs=1
 target_accuracy=2 #"0.749"
 stop_instance_when_done=true ##################WARNING##################
 
@@ -71,23 +71,23 @@ ${cmd[@]} 2>&1 | tee $log_out
 echo ""
 echo "Finished training!"
 
-if [ "$stop_instance_when_done" = true ] ; then
-    echo "WARNING: Deleting training disk and stopping instance in 60 seconds..."
-    for i in $(seq 1 1 59); do
-        sleep 1
-        echo $((60-$i))
-    done
+# if [ "$stop_instance_when_done" = true ] ; then
+#     echo "WARNING: Deleting training disk and stopping instance in 60 seconds..."
+#     for i in $(seq 1 1 59); do
+#         sleep 1
+#         echo $((60-$i))
+#     done
 
-    sudo umount /dev/sdb /training-data
+#     sudo umount /dev/sdb /training-data
 
-    DISK_NAME="$HOSTNAME-training-data"
-    echo "Detaching $DISK_NAME disk..."
-    gcloud compute instances detach-disk $HOSTNAME --disk $DISK_NAME --zone us-central1-a
+#     DISK_NAME="$HOSTNAME-training-data"
+#     echo "Detaching $DISK_NAME disk..."
+#     gcloud compute instances detach-disk $HOSTNAME --disk $DISK_NAME --zone us-central1-a
 
-    echo "Deleting $DISK_NAME disk..."
-    gcloud compute disks delete $DISK_NAME --zone us-central1-a --quiet
+#     echo "Deleting $DISK_NAME disk..."
+#     gcloud compute disks delete $DISK_NAME --zone us-central1-a --quiet
 
-    # stop instance
-    gcloud compute instances stop $HOSTNAME --zone us-central1-a
-fi
+#     # stop instance
+#     gcloud compute instances stop $HOSTNAME --zone us-central1-a
+# fi
 
