@@ -60,7 +60,7 @@ function run_one {(
 
   # Restart the cluster
   echo "Restarting service..."
-  ./manage_cluster.sh restart_service -n ${scale} -f ${config_name}
+  #./manage_cluster.sh restart_service -n ${scale} -f ${config_name}
   # python ${service_loc}/service_deploy.py --config=${config_name} --restart
   echo "Service restarted!"
 )}
@@ -72,7 +72,7 @@ function start_cluster {(
 
   echo "Deploying service with ${workers} workers..."
   sed "s/cache_policy:[ \t]\+[0-9]\+/cache_policy: $cache_policy/g" "${service_loc}/default_config.yaml" > ${service_loc}/temp_config.yaml
-  ./manage_cluster.sh restart_service -w ${workers} -f ${service_loc}/temp_config.yaml
+  #./manage_cluster.sh restart_service -w ${workers} -f ${service_loc}/temp_config.yaml
   echo "Done deploying service!"
 )}
 
