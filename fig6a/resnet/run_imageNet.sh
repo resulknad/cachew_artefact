@@ -64,7 +64,7 @@ params+="--verbosity=1 "
 cmd="python3 resnet_ctl_imagenet_main.py ${params[@]}"
 log_out="$HOME/logs/resnet50-$exp_name-$timestamp.txt"
 
-echo "Running experiment '$exp_name' ($CACHEW_METRIC_DUMP)"
+echo "Running experiment '$exp_name' ($CACHEW_METRICS_DUMP)"
 echo "Training model and piping output to $log_out ..."
 ${cmd[@]} 2>&1 | tee $log_out
 
