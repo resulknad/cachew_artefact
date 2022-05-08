@@ -10,15 +10,15 @@ data_dir="gs://tfdata-imagenet" # ImageNet from GCS
 #data_dir="/training-data/imagenet-tiny/tfrecords" # Tiny
 #data_dir="/training-data/imagenet_test/tfrecords" # Test dataset with 4 images
 
-epochs=90
+epochs=1
 target_accuracy=2 #"0.749"
 stop_instance_when_done=true ##################WARNING##################
 
-num_training_images=1281167 # ImageNet
+num_training_images=128 # 1167 # ImageNet
 #num_training_images=100000 # Tiny ImageNet
 #num_training_images=4 # Test dataset
 
-num_gpus=4
+num_gpus=1
 per_gpu_batch_size=312
 batch_size=$(($per_gpu_batch_size * $num_gpus))
 steps_per_loop=$(($num_training_images / $batch_size + 1))
@@ -56,7 +56,7 @@ params+="--data_dir=$data_dir "
 params+="--model_dir=$model_dir "
 params+="--enable_checkpoint_and_export=$enable_checkpoint_and_export "
 params+="--single_l2_loss_op "
-params+="--verbosity=0 "
+params+="--verbosity=1 "
 #params+="--nouse_tf_function --nouse_tf_while_loop"
 
 
@@ -70,24 +70,3 @@ ${cmd[@]} 2>&1 | tee $log_out
 
 echo ""
 echo "Finished training!"
-
-if [ "$stop_instance_when_done" = true ] ; then
-    echo "WARNING: Deleting training disk and stopping instance in 60 seconds..."
-    for i in $(seq 1 1 59); do
-        sleep 1
-        echo $((60-$i))
-    done
-
-    sudo umount /dev/sdb /training-data
-
-    DISK_NAME="$HOSTNAME-training-data"
-    echo "Detaching $DISK_NAME disk..."
-    gcloud compute instances detach-disk $HOSTNAME --disk $DISK_NAME --zone us-central1-a
-
-    echo "Deleting $DISK_NAME disk..."
-    gcloud compute disks delete $DISK_NAME --zone us-central1-a --quiet
-
-    # stop instance
-    gcloud compute instances stop $HOSTNAME --zone us-central1-a
-fi
-

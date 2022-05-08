@@ -169,6 +169,7 @@ def process_record_dataset(dataset,
 
   if DISPATCHER_IP is not None and is_training is True:
     dataset = dataset.apply(tf.data.experimental.service.distribute(
+                                job_name="jobname",
       processing_mode="distributed_epoch", service="grpc://" + DISPATCHER_IP + ":31000",
       max_outstanding_requests=16, max_request_pipelining_per_worker=2, compression=None
     ))
