@@ -122,6 +122,7 @@ function run_many {(
   current_dir=$( pwd )
   cd ${service_loc}
 
+
   # Start the experiments
   for i in "${scale[@]}"; do
     start_cluster "${i}" "${cache_policy}" 2
@@ -140,7 +141,13 @@ function run_many {(
 
 # Run the experiments
 # run_many "${mode}" "${scale}" "${runs}"
+current_dir=$( pwd )
+cd ${service_loc}
+
 echo "Run autoscaling mode..."
 start_cluster "${i}" "${cache_policy}" 1
 update_dispatcher
 run_one "1" "4" "${service_loc}/temp_config.yaml" 1
+
+cd ${current_dir}
+
