@@ -159,3 +159,5 @@ cd ${current_dir}
 } > "${log_dir}"/epochs.csv
 
 grep -r "request: " "${log_dir}" | sed 's/.*request: \([0-9]*\)/\1/g' > "${log_dir}"/cachew_decision.txt
+
+python plot.py "${log_dir}"
