@@ -39,9 +39,14 @@ function run_one {(
   run=${1}
   scale=${2}
   config_name=${3}
+  scale_policy=${4}
 
   # Run the experiment
-  experiment_dir=${log_dir}/${scale}_workers/run_${run}
+  if [[ -n $scale_policy ]]; then
+    experiment_dir=${log_dir}/autoscale/run_${run}
+  else
+    experiment_dir=${log_dir}/${scale}_workers/run_${run}
+  fi
   cluster_log_dir=${experiment_dir}/cluster
   mkdir -p ${cluster_log_dir}  # Implicitly creates experiment_dir
   echo "Starting run ${run} with ${scale} workers and writing to ${experiment_dir}/output.log ..."
@@ -69,10 +74,11 @@ function run_one {(
 function start_cluster {(
   local workers=${1}
   local cache_policy=${2}
+  local scale_policy=${3}
 
   echo "Deploying service with ${workers} workers..."
   sed "s/cache_policy:[ \t]\+[0-9]\+/cache_policy: $cache_policy/g" "${service_loc}/default_config.yaml" > ${service_loc}/temp_config.yaml
-  ./manage_cluster.sh restart_service -w ${workers} -f ${service_loc}/temp_config.yaml
+  ./manage_cluster.sh restart_service -s ${scale_policy} -w ${workers} -f ${service_loc}/temp_config.yaml
   echo "Done deploying service!"
 )}
 
@@ -118,11 +124,11 @@ function run_many {(
 
   # Start the experiments
   for i in "${scale[@]}"; do
-    start_cluster "${i}" "${cache_policy}"
+    start_cluster "${i}" "${cache_policy}" 2
     update_dispatcher
 
     for j in $(seq 1 ${runs}); do
-      run_one "${j}" "${i}" "${service_loc}/temp_config.yaml"
+      run_one "${j}" "${i}" "${service_loc}/temp_config.yaml" ""
     done
 
 #    terminate_cluster "${i}"
@@ -133,4 +139,8 @@ function run_many {(
 )}
 
 # Run the experiments
-run_many "${mode}" "${scale}" "${runs}"
+# run_many "${mode}" "${scale}" "${runs}"
+echo "Run autoscaling mode..."
+start_cluster "${i}" "${cache_policy}" 1
+update_dispatcher
+run_one "1" "4" "${service_loc}/temp_config.yaml" 1
