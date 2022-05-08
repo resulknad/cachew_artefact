@@ -10,7 +10,7 @@ log_dir=${SCRIPT_DIR}/traces_multi_tenant_$( date +"%Y-%m-%d_%T" )
 mkdir -p ${log_dir}
 
 echo "Running experiments on ResNet..."
-scale=(1 2 3 ) # 4 5 6)
+scale=(1) #2 3 ) # 4 5 6)
 base_dir=$(realpath ../resnet)
 executable="run_imageNet.sh"
 preprocessing_source="imagenet_preprocessing.py"
