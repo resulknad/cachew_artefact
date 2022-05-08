@@ -140,7 +140,8 @@ function run_many {(
 )}
 
 # Run the experiments
-# run_many "${mode}" "${scale}" "${runs}"
+run_many "${mode}" "${scale}" "${runs}"
+
 current_dir=$( pwd )
 cd ${service_loc}
 
@@ -148,6 +149,7 @@ echo "Run autoscaling mode..."
 start_cluster "4" "2" "1"
 update_dispatcher
 run_one "1" "4" "${service_loc}/temp_config.yaml" "1"
+grep -r "request: " . | sed 's/.*request: \([0-9]*\)/\1/g' > cachew_decision.txt
 
 cd ${current_dir}
 
