@@ -46,7 +46,7 @@ region="us-central1"
 zone="us-central1-a"
 mnt="/mnt/disks/gluster_data"
 service_config_yaml="default_config.yaml"
-scaling_policy=2
+scaling_policy=1
 logfile="${programname}_log.txt"
 export KOPS_STATE_STORE=gs://easl-dbk-kubernetes-state
 
