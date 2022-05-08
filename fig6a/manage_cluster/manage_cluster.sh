@@ -46,6 +46,7 @@ region="us-central1"
 zone="us-central1-a"
 mnt="/mnt/disks/gluster_data"
 service_config_yaml="default_config.yaml"
+scaling_policy=2
 logfile="${programname}_log.txt"
 export KOPS_STATE_STORE=gs://easl-dbk-kubernetes-state
 
@@ -55,6 +56,7 @@ function usage {
     echo "  -f [Cachew service config yaml]"
     echo "  -n [nethz ID]"
     echo "  -w [number of Cachew workers]"
+    echo "  -s [scaling policy]"
     exit 1
 }
 
@@ -66,7 +68,7 @@ if [[ "$cmd" != "start" ]] && [[ "$cmd" != "stop" ]] && [[ "$cmd" != "status" ]]
     exit 1
 fi
 
-while getopts "h?g:n:f:w:" opt; do
+while getopts "h?g:n:f:w:s:" opt; do
   case "$opt" in
     h|\?)
       usage
@@ -76,6 +78,8 @@ while getopts "h?g:n:f:w:" opt; do
     g)  gluster_nodes=$OPTARG
       ;;
     w)  num_tfdata_workers=$OPTARG
+      ;;
+    s)  scaling_policy=$OPTARG
       ;;
     n)  nethz=$OPTARG
       ;;
@@ -363,6 +367,7 @@ deploy_tfdata_service () {
   {
     echo "dispatcher_ip: $kube_dispatcher_name" 
     echo "disp_port: 31000"
+    echo "scaling_policy: ${scaling_policy}"
     echo "docker_image: gcr.io/tfdata-service/$(yq -r ".image" $service_config_yaml)"
   } >> tmp/data_service_inp.yaml
   
