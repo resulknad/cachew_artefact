@@ -50,7 +50,7 @@ function run_one {(
   cluster_log_dir=${experiment_dir}/cluster
   mkdir -p ${cluster_log_dir}  # Implicitly creates experiment_dir
   echo "Starting run ${run} with ${scale} workers and writing to ${experiment_dir}/output.log ..."
-  ( cd ${base_dir} && CACHEW_METRICS_DUMP=${experiment_dir}/metrics.csv ./${executable} ) #> ${experiment_dir}/output.log 2>&1 )
+  ( cd ${base_dir} && CACHEW_METRICS_DUMP=${experiment_dir}/metrics.csv ./${executable} > ${experiment_dir}/output.log 2>&1 )
   echo "Finished run ${run} with ${scale} workers!"
 
   # Dump the kubernetes cluster stats
@@ -149,7 +149,13 @@ echo "Run autoscaling mode..."
 start_cluster "4" "2" "1"
 update_dispatcher
 run_one "1" "4" "${service_loc}/temp_config.yaml" "1"
-grep -r "request: " . | sed 's/.*request: \([0-9]*\)/\1/g' > cachew_decision.txt
+
 
 cd ${current_dir}
 
+{
+  echo "workers,epoch_time"
+  grep -r "TimeHistory" "${log_dir}" | sed 's/.*\/\([0-9]*\)_workers.*TimeHistory: \([0-9\.]*\).*/\1,\2/g'
+} > "${log_dir}"/epochs.csv
+
+grep -r "request: " "${log_dir}" | sed 's/.*request: \([0-9]*\)/\1/g' > "${log_dir}"/cachew_decision.txt
