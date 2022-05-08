@@ -140,12 +140,9 @@ class StandardTrainer(runner.AbstractTrainer, metaclass=abc.ABCMeta):
     if self._train_loop_fn is None:
       self._train_loop_fn = self.create_train_loop_fn()
 
-    # if self._train_iter is None:
-    #   self._train_iter = tf.nest.map_structure(iter, self.train_dataset)
-    self._train_iter = tf.nest.map_structure(iter, self.train_dataset)
+    if self._train_iter is None:
+      self._train_iter = tf.nest.map_structure(iter, self.train_dataset)
 
-    tf.print(
-      f"########################################################## outer num_steps: {num_steps}")
     self._train_loop_fn(self._train_iter, num_steps)
     return self.train_loop_end()
 

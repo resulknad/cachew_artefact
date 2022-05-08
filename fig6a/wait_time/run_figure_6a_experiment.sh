@@ -45,7 +45,7 @@ function run_one {(
   cluster_log_dir=${experiment_dir}/cluster
   mkdir -p ${cluster_log_dir}  # Implicitly creates experiment_dir
   echo "Starting run ${run} with ${scale} workers and writing to ${experiment_dir}/output.log ..."
-  ( cd ${base_dir} && CACHEW_METRICS_DUMP=${experiment_dir}/metrics.csv ./${executable} > ${experiment_dir}/output.log 2>&1 )
+  ( cd ${base_dir} && CACHEW_METRICS_DUMP=${experiment_dir}/metrics.csv ./${executable} ) #> ${experiment_dir}/output.log 2>&1 )
   echo "Finished run ${run} with ${scale} workers!"
 
   # Dump the kubernetes cluster stats

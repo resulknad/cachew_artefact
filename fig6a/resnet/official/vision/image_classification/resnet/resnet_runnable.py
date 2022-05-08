@@ -15,9 +15,7 @@
 """Runs a ResNet model on the ImageNet dataset using custom training loops."""
 
 import orbit
-import os
 import tensorflow as tf
-import time
 
 from official.modeling import performance
 from official.staging.training import grad_utils
@@ -25,9 +23,6 @@ from official.utils.flags import core as flags_core
 from official.vision.image_classification.resnet import common
 from official.vision.image_classification.resnet import imagenet_preprocessing
 from official.vision.image_classification.resnet import resnet_model
-
-
-LOG_FILE = "model_event_log.log"
 
 
 class ResnetRunnable(orbit.StandardTrainer, orbit.StandardEvaluator):
@@ -142,12 +137,12 @@ class ResnetRunnable(orbit.StandardTrainer, orbit.StandardEvaluator):
     self._epoch_begin()
     self.time_callback.on_batch_begin(self.epoch_helper.batch_index)
 
-  def train_step(self, data):
+  def train_step(self, iterator):
     """See base class."""
 
-    def step_fn(ddata):
+    def step_fn(inputs):
       """Function to run on the device."""
-      images, labels = ddata
+      images, labels = inputs
       with tf.GradientTape() as tape:
         logits = self.model(images, training=True)
 
@@ -174,7 +169,7 @@ class ResnetRunnable(orbit.StandardTrainer, orbit.StandardEvaluator):
       self.train_accuracy.update_state(labels, logits)
     if self.flags_obj.enable_xla:
       step_fn = tf.function(step_fn, jit_compile=True)
-    self.strategy.run(step_fn, args=(data,))
+    self.strategy.run(step_fn, args=(next(iterator),))
 
   def train_loop_end(self):
     """See base class."""
@@ -218,23 +213,12 @@ class ResnetRunnable(orbit.StandardTrainer, orbit.StandardEvaluator):
     results["continue_training"] = continue_training
     return results
 
-  def _write_to_file(self, value):
-    timestamp = time.time() * 10 ** 6
-    file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                             LOG_FILE)
-    write_header = not os.path.exists(file_path)
-    with open(file_path, "a+") as f:
-      if write_header:
-        f.write(f"time,event\n")
-      f.write(f"{timestamp},{value}\n")
-
   def _epoch_begin(self):
     if self.epoch_helper.epoch_begin():
       self.time_callback.on_epoch_begin(self.epoch_helper.current_epoch)
-    self._write_to_file("epoch_begin")
+
     tf.print("current_epoch :", self.epoch_helper._current_epoch)
 
   def _epoch_end(self):
     if self.epoch_helper.epoch_end():
       self.time_callback.on_epoch_end(self.epoch_helper.current_epoch)
-    self._write_to_file("epoch_end")
