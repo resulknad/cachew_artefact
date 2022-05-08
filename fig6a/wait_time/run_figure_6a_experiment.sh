@@ -10,7 +10,7 @@ log_dir=${SCRIPT_DIR}/traces_multi_tenant_$( date +"%Y-%m-%d_%T" )
 mkdir -p ${log_dir}
 
 echo "Running experiments on ResNet..."
-scale=(1) #2 3 ) # 4 5 6)
+scale=(1 2 3 4 5 6 7 8)
 base_dir=$(realpath ../resnet)
 executable="run_imageNet.sh"
 preprocessing_source="imagenet_preprocessing.py"
@@ -146,16 +146,16 @@ current_dir=$( pwd )
 cd ${service_loc}
 
 echo "Run autoscaling mode..."
-start_cluster "4" "2" "1"
+start_cluster "8" "2" "1"
 update_dispatcher
-run_one "1" "4" "${service_loc}/temp_config.yaml" "1"
+run_one "1" "8" "${service_loc}/temp_config.yaml" "1"
 
 
 cd ${current_dir}
 
 {
   echo "workers,epoch_time"
-  grep -r "TimeHistory" "${log_dir}" | sed 's/.*\/\([0-9]*\)_workers.*TimeHistory: \([0-9\.]*\).*/\1,\2/g'
+  grep -r "TimeHistory" "${log_dir}" --exclude-dir "*autoscale*" | sed 's/.*\/\([0-9]*\)_workers.*TimeHistory: \([0-9\.]*\).*/\1,\2/g'
 } > "${log_dir}"/epochs.csv
 
 grep -r "request: " "${log_dir}" | sed 's/.*request: \([0-9]*\)/\1/g' > "${log_dir}"/cachew_decision.txt
