@@ -277,23 +277,25 @@ setup_kubernetes_nodes () {
   else
     echo_failure
   fi
-
-  list=$(get_kube_workers)
-  while IFS= read -r node_name; do
-    echo -n "Setting up node $node_name..."
-    timeout=0
-    until ( gcloud compute ssh --strict-host-key-checking=no "$node_name" --command="gcloud auth configure-docker --quiet" && \
-         gcloud compute ssh --strict-host-key-checking=no "$node_name" --command="mkdir /tmp/turboboost/ || true" && \
-         gcloud compute scp --strict-host-key-checking=no --recurse ./templates/disable_turbo_boost.sh "$node_name:/tmp/turboboost/disable_turbo_boost.sh" ) < /dev/null >> "$logfile" 2>&1; do #&& \
-   #      gcloud compute ssh --strict-host-key-checking=no "$node_name" --command="sudo apt-get install msr-tools && sudo modprobe msr && /tmp/turboboost/disable_turbo_boost.sh disable" ) < /dev/null >> "$logfile" 2>&1; do
-      timeout=$((timeout + 1))
-      if (( timeout > 20 )); then
-        echo_failure
-      fi
-      sleep 5
-    done
-   echo_success
-  done <<< "$list"
+  
+  if false; then
+    list=$(get_kube_workers)
+    while IFS= read -r node_name; do
+      echo -n "Setting up node $node_name..."
+      timeout=0
+      until ( gcloud compute ssh --strict-host-key-checking=no "$node_name" --command="gcloud auth configure-docker --quiet" && \
+           gcloud compute ssh --strict-host-key-checking=no "$node_name" --command="mkdir /tmp/turboboost/ || true" && \
+           gcloud compute scp --strict-host-key-checking=no --recurse ./templates/disable_turbo_boost.sh "$node_name:/tmp/turboboost/disable_turbo_boost.sh" ) < /dev/null >> "$logfile" 2>&1; do #&& \
+     #      gcloud compute ssh --strict-host-key-checking=no "$node_name" --command="sudo apt-get install msr-tools && sudo modprobe msr && /tmp/turboboost/disable_turbo_boost.sh disable" ) < /dev/null >> "$logfile" 2>&1; do
+        timeout=$((timeout + 1))
+        if (( timeout > 20 )); then
+          echo_failure
+        fi
+        sleep 5
+      done
+     echo_success
+    done <<< "$list"
+  fi
 
 }
 
@@ -422,9 +424,9 @@ elif [[ "$cmd" == "restart_service" ]]; then
 elif [[ "$cmd" == "start" ]]; then
   start_gluster
   mount_glusterfs
-  stop_kubernetes
+  #stop_kubernetes
   start_kubernetes
-  #setup_kubernetes_nodes
+  setup_kubernetes_nodes
   deploy_tfdata_service
 elif [[ "$cmd" == "stop" ]]; then
   stop_tfdata_service
