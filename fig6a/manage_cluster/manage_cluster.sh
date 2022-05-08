@@ -373,7 +373,7 @@ deploy_tfdata_service () {
     echo_failure
   fi
 
-  echo -n "Waiting for service to come up..."
+  echo -n "Waiting for Cachew to come up..."
   timeout=0
   until tfdata_service_pods_running; do
     timeout=$((timeout + 1))
