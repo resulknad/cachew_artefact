@@ -14,7 +14,7 @@ epochs=90
 target_accuracy=2 #"0.749"
 stop_instance_when_done=true ##################WARNING##################
 
-num_training_images=10 #1281167 # ImageNet
+num_training_images=1281167 # ImageNet
 #num_training_images=100000 # Tiny ImageNet
 #num_training_images=4 # Test dataset
 
@@ -56,7 +56,7 @@ params+="--data_dir=$data_dir "
 params+="--model_dir=$model_dir "
 params+="--enable_checkpoint_and_export=$enable_checkpoint_and_export "
 params+="--single_l2_loss_op "
-params+="--verbosity=1 "
+params+="--verbosity=0 "
 #params+="--nouse_tf_function --nouse_tf_while_loop"
 
 
