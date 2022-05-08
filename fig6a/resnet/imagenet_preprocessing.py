@@ -257,12 +257,12 @@ def get_filenames(is_training, data_dir):
     return [
         os.path.join(data_dir, f"train/train-{i:05d}-of-{_NUM_TRAIN_FILES:05d}")
         for i in range(_NUM_TRAIN_FILES)
-        ][:40]
+        ][:250]
   else:
     return [
         os.path.join(data_dir, f"validation/validation-{i:05d}-of-{_NUM_VAL_FILES:05d}")
         for i in range(_NUM_VAL_FILES)
-        ][:40]
+        ][:250]
 
 
 def parse_example_proto(example_serialized):
