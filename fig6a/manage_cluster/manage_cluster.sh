@@ -375,6 +375,16 @@ deploy_tfdata_service () {
 
   done
 
+  # autoscale templates needs this - seems to be more of a workaround
+  {
+    i=0
+    echo "w:"
+    echo "  index: $i"
+    echo "  port: $(( 31001 + i))" 
+    echo "  name: data-service-worker-${i}"
+    echo "  ip: ${worker_names_array[$i]}" 
+  } >> tmp/data_service_inp.yaml
+    
   {
     echo "dispatcher_ip: $kube_dispatcher_name" 
     echo "disp_port: 31000"
