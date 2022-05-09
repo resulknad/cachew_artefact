@@ -121,7 +121,7 @@ def main(argv):
     plt.errorbar(sleep_times[:len(source_cache_times)], source_cache_times, source_cache_std, fmt='x-', label="Source cache", color=(0.57, 0.36, 0.51), linewidth=2, elinewidth=1, capsize=1.3)
     plt.errorbar(sleep_times[:len(cache_times)], cache_times, cache_std, fmt='^-', label="Full Cache", color=(0.53, 0.66, 0.42), linewidth=2, elinewidth=1, capsize=1.3)
     plt.plot(sleep_times[:len(cachew_times)], cachew_times, marker='o', label="Cachew", color='orange', linewidth=10, alpha=0.6)
-    plt.plot(sleep_times[:len(cachew_raw_times)], cachew_raw_times, marker='o', label="Cachew Raw", color='pink', linewidth=10, alpha=0.6)
+#    plt.plot(sleep_times[:len(cachew_raw_times)], cachew_raw_times, marker='o', label="Cachew Raw", color='pink', linewidth=10, alpha=0.6)
     plt.legend(frameon=False, loc='lower right')
 
     dest_name = FLAGS.data

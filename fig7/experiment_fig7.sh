@@ -23,7 +23,7 @@ out_dir=$(realpath "./experiment_out")
 out_dir_bak=$(realpath "./experiments_bak")
 
 if [[ -d $out_dir ]]; then
-  rm -rf $out_dir
+  sudo mv -"$out_dir"/* "$out_dir_bak"
 fi
 mkdir -p "$out_dir"
 

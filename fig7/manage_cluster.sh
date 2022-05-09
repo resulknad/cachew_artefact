@@ -268,31 +268,32 @@ setup_kubernetes_nodes () {
     echo_failure
   fi
 
-  echo -n "Setting gcloud region to $region and $zone"
-  if gcloud config set compute/region $region >> "$logfile" 2>&1 && \
-    gcloud config set compute/zone $zone >> "$logfile" 2>&1; then
-    echo_success
-  else
-    echo_failure
+  if false; then
+    echo -n "Setting gcloud region to $region and $zone"
+    if gcloud config set compute/region $region >> "$logfile" 2>&1 && \
+      gcloud config set compute/zone $zone >> "$logfile" 2>&1; then
+      echo_success
+    else
+      echo_failure
+    fi
+
+    list=$(get_kube_workers)
+    while IFS= read -r node_name; do
+      echo -n "Setting up node $node_name..."
+      timeout=0
+      until ( gcloud compute ssh --strict-host-key-checking=no "$node_name" --command="gcloud auth configure-docker --quiet" && \
+           gcloud compute ssh --strict-host-key-checking=no "$node_name" --command="mkdir /tmp/turboboost/ || true" && \
+           gcloud compute scp --strict-host-key-checking=no --recurse ./templates/disable_turbo_boost.sh "$node_name:/tmp/turboboost/disable_turbo_boost.sh" && \
+           gcloud compute ssh --strict-host-key-checking=no "$node_name" --command="sudo apt-get install msr-tools && sudo modprobe msr && /tmp/turboboost/disable_turbo_boost.sh disable" ) < /dev/null >> "$logfile" 2>&1; do
+        timeout=$((timeout + 1))
+        if (( timeout > 20 )); then
+          echo_failure
+        fi
+        sleep 5
+      done
+     echo_success
+    done <<< "$list"
   fi
-
-  list=$(get_kube_workers)
-  while IFS= read -r node_name; do
-    echo -n "Setting up node $node_name..."
-    timeout=0
-    until ( gcloud compute ssh --strict-host-key-checking=no "$node_name" --command="gcloud auth configure-docker --quiet" && \
-         gcloud compute ssh --strict-host-key-checking=no "$node_name" --command="mkdir /tmp/turboboost/ || true" && \
-         gcloud compute scp --strict-host-key-checking=no --recurse ./templates/disable_turbo_boost.sh "$node_name:/tmp/turboboost/disable_turbo_boost.sh" && \
-         gcloud compute ssh --strict-host-key-checking=no "$node_name" --command="sudo apt-get install msr-tools && sudo modprobe msr && /tmp/turboboost/disable_turbo_boost.sh disable" ) < /dev/null >> "$logfile" 2>&1; do
-      timeout=$((timeout + 1))
-      if (( timeout > 20 )); then
-        echo_failure
-      fi
-      sleep 5
-    done
-   echo_success
-  done <<< "$list"
-
 }
 
 tfdata_service_pods_running () {
