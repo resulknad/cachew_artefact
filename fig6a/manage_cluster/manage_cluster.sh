@@ -410,7 +410,7 @@ deploy_tfdata_service () {
 
   if [[ -n $kubernetes_hpa ]]; then
     echo -n "Creating Kubernetes HPA..."
-    if kubectl autoscale rs data-service-worker --cpu-percent=80 --min=1 --max="$num_kube_workers" >> "$logfile" 2>&1; then
+    if kubectl autoscale rs data-service-worker --cpu-percent=10 --min=1 --max="$num_kube_workers" >> "$logfile" 2>&1; then
       echo_success
     else
       echo_failure
