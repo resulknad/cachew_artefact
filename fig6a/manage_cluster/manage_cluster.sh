@@ -463,7 +463,7 @@ stop_tfdata_service () {
     # if we are launching kubernetes_gpa, then we do not create
     # a service data-service-worker, so no need to delete it
     if kubectl delete rs "$service" >> "$logfile" 2>&1 \
-      && ([[ -z $kubernetes_hpa ]] || delete service "$service"  >> "$logfile" 2>&1); then
+      && ([[ -z "$kubernetes_hpa" ]] || kubectl delete service "$service"  >> "$logfile" 2>&1); then
       echo_success
     else
       echo_failure
