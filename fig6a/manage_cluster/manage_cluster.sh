@@ -46,7 +46,10 @@ region="us-central1"
 zone="us-central1-a"
 mnt="/mnt/disks/gluster_data"
 service_config_yaml="default_config.yaml"
+cachew_service_tmpl="./templates/data_service.yaml"
+cachew_service_interfaces_tmpl="./templates/data_service_interfaces.yaml"
 scaling_policy=2
+kubernetes_hpa=""
 logfile="${programname}_log.txt"
 export KOPS_STATE_STORE=gs://easl-dbk-kubernetes-state
 
@@ -57,6 +60,7 @@ function usage {
     echo "  -n [nethz ID]"
     echo "  -w [number of Cachew workers]"
     echo "  -s [scaling policy]"
+    echo "  -a enable kubernetes HPA"
     exit 1
 }
 
@@ -68,7 +72,7 @@ if [[ "$cmd" != "start" ]] && [[ "$cmd" != "stop" ]] && [[ "$cmd" != "status" ]]
     exit 1
 fi
 
-while getopts "h?g:n:f:w:s:" opt; do
+while getopts "h?g:n:f:w:s:a" opt; do
   case "$opt" in
     h|\?)
       usage
@@ -83,8 +87,15 @@ while getopts "h?g:n:f:w:s:" opt; do
       ;;
     n)  nethz=$OPTARG
       ;;
+    a)  kubernetes_hpa=1
+      ;;
   esac
 done
+
+if [[ -n "$kubernetes_hpa" ]]; then
+  cachew_service_tmpl="./templates/data_service_autoscale.yaml.jinja"
+  cachew_service_interfaces_tmpl="./templates/data_service_interfaces_autoscale.yaml.jinja"
+fi
 
 export KOPS_CLUSTER_NAME=${nethz}-tfdata-service.k8s.local
 
@@ -317,7 +328,7 @@ deploy_tfdata_service () {
     echo "  port: $(( 31001 + i))" >> tmp/inp.yaml
   done
 
-  if jinja2 ./templates/data_service_interfaces.yaml ./tmp/inp.yaml > ./tmp/data_service_interfaces.yaml && \
+  if jinja2 $cachew_service_interfaces_tmpl ./tmp/inp.yaml > ./tmp/data_service_interfaces.yaml && \
     kubectl apply -f tmp/data_service_interfaces.yaml >> "$logfile" 2>&1; then
     echo_success
   else
@@ -368,10 +379,12 @@ deploy_tfdata_service () {
     echo "dispatcher_ip: $kube_dispatcher_name" 
     echo "disp_port: 31000"
     echo "scaling_policy: ${scaling_policy}"
+    echo "replicas: ${num_tfdata_workers}"
     echo "docker_image: gcr.io/tfdata-service/$(yq -r ".image" $service_config_yaml)"
   } >> tmp/data_service_inp.yaml
   
-  jinja2 ./templates/data_service.yaml ./tmp/data_service_inp.yaml > ./tmp/data_service.yaml
+
+  jinja2 "$cachew_service_tmpl"  ./tmp/data_service_inp.yaml > ./tmp/data_service.yaml
   if kubectl apply -f tmp/data_service.yaml > "$logfile" 2>&1; then
     echo_success
   else
