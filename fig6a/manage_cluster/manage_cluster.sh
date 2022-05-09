@@ -442,6 +442,20 @@ stop_tfdata_service () {
   services=$(kubectl get services | grep data-service | awk '{print $1}')
   readarray -t services_arr <<<"$services"
   
+
+  services=$(kubectl get hpa | grep data-service | awk '{print $1}')
+  readarray -t services_arr <<<"$services"
+  
+  for service in "${services_arr[@]}"
+  do
+    echo -n "Deleting HPA $service..."
+    if kubectl delete hpa "$service" > "$logfile" 2>&1; then
+      echo_success
+    else
+      echo_failure
+    fi
+  done 
+
   for service in "${services_arr[@]}"
   do
     echo -n "Stopping $service..."
@@ -466,18 +480,6 @@ stop_tfdata_service () {
     fi
   done 
 
-  services=$(kubectl get hpa | grep data-service | awk '{print $1}')
-  readarray -t services_arr <<<"$services"
-  
-  for service in "${services_arr[@]}"
-  do
-    echo -n "Deleting HPA $service..."
-    if kubectl delete hpa "$service" > "$logfile" 2>&1; then
-      echo_success
-    else
-      echo_failure
-    fi
-  done 
 }
 
 install_dependencies () {
