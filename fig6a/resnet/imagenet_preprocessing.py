@@ -57,7 +57,7 @@ if DATASET == "ImageNet":
   DEFAULT_IMAGE_SIZE = 224
   NUM_CLASSES = 1001
   NUM_IMAGES = {
-    'train': 1281167 // 10,
+    'train': 1281167,
     'validation': 50000,
   }
   _NUM_TRAIN_FILES = 1024
