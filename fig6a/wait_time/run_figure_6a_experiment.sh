@@ -178,7 +178,7 @@ current_dir=$( pwd )
 cd ${service_loc}
 
 echo "Run Kubernetes HPA autoscaling mode..."
-start_cluster "8" "2" "HPA"
+start_cluster "1" "2" "HPA"
 update_dispatcher
 run_one "1" "1" "${service_loc}/temp_config.yaml" "HPA"
 
