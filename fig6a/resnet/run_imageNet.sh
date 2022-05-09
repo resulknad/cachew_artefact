@@ -14,7 +14,7 @@ epochs=1
 target_accuracy=2 #"0.749"
 stop_instance_when_done=true ##################WARNING##################
 
-num_training_images=1281167 # ImageNet
+num_training_images=128116 #7 # ImageNet
 #num_training_images=100000 # Tiny ImageNet
 #num_training_images=4 # Test dataset
 
