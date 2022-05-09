@@ -514,6 +514,6 @@ elif [[ "$cmd" == "start" ]]; then
 elif [[ "$cmd" == "stop" ]]; then
   stop_tfdata_service
   umount_glusterfs
-  stop_gluster 
+  #stop_gluster 
   stop_kubernetes
 fi

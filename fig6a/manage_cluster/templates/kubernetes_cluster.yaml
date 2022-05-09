@@ -32,6 +32,8 @@ spec:
     legacy: false
   kubelet:
     anonymousAuth: false
+    authorizationMode: Webhook
+    authenticationTokenWebhook: true
   kubernetesApiAccess:
   - 0.0.0.0/0
   kubernetesVersion: 1.18.9
@@ -51,6 +53,9 @@ spec:
       type: Public
     masters: public
     nodes: public
+  metricsServer:
+    enabled: true
+    insecure: true 
 
 ---
 
