@@ -459,26 +459,31 @@ stop_tfdata_service () {
   for service in "${services_arr[@]}"
   do
     echo -n "Stopping $service..."
+
+    # if we are launching kubernetes_gpa, then we do not create
+    # a service data-service-worker, so no need to delete it
     if kubectl delete rs "$service" >> "$logfile" 2>&1 \
-      && kubectl delete service "$service"  >> "$logfile" 2>&1; then
+      && ([[ -z $kubernetes_hpa ]] || delete service "$service"  >> "$logfile" 2>&1); then
       echo_success
     else
       echo_failure
     fi
   done 
 
-  services=$(kubectl get pods | grep data-service | awk '{print $1}')
-  readarray -t services_arr <<<"$services"
-  
-  for service in "${services_arr[@]}"
-  do
-    echo -n "Deleting pod $service..."
-    if kubectl delete pod "$service" >> "$logfile" 2>&1; then
-      echo_success
-    else
-      echo_failure
-    fi
-  done 
+  if false; then
+    services=$(kubectl get pods | grep data-service | awk '{print $1}')
+    readarray -t services_arr <<<"$services"
+    
+    for service in "${services_arr[@]}"
+    do
+      echo -n "Deleting pod $service..."
+      if kubectl delete pod "$service" >> "$logfile" 2>&1; then
+        echo_success
+      else
+        echo_failure
+      fi
+    done 
+  fi
 
 }
 
