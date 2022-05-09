@@ -364,7 +364,7 @@ deploy_tfdata_service () {
   } >> tmp/data_service_inp.yaml
   
   jinja2 ./templates/data_service.yaml ./tmp/data_service_inp.yaml > ./tmp/data_service.yaml
-  if kubectl apply -f tmp/data_service.yaml > "$logfile" 2>&1; then
+  if kubectl apply -f tmp/data_service.yaml >> "$logfile" 2>&1; then
     echo_success
   else
     echo_failure
@@ -392,8 +392,8 @@ stop_tfdata_service () {
   for service in "${services_arr[@]}"
   do
     echo -n "Stopping $service..."
-    if kubectl delete rs "$service" > "$logfile" 2>&1 \
-      && kubectl delete service "$service"  > "$logfile" 2>&1; then
+    if kubectl delete rs "$service" >> "$logfile" 2>&1 \
+      && kubectl delete service "$service"  >> "$logfile" 2>&1; then
       echo_success
     else
       echo_failure

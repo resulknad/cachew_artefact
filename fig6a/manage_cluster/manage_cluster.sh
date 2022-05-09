@@ -396,7 +396,7 @@ deploy_tfdata_service () {
   
 
   jinja2 "$cachew_service_tmpl"  ./tmp/data_service_inp.yaml > ./tmp/data_service.yaml
-  if kubectl apply -f tmp/data_service.yaml > "$logfile" 2>&1; then
+  if kubectl apply -f tmp/data_service.yaml >> "$logfile" 2>&1; then
     echo_success
   else
     echo_failure
@@ -404,7 +404,7 @@ deploy_tfdata_service () {
 
   if [[ -n $kubernetes_hpa ]]; then
     echo -n "Creating Kubernetes HPA..."
-    if kubectl autoscale rs data-service-worker --cpu-percent=80 --min=1 --max="$num_kube_workers" > "$logfile" 2>&1; then
+    if kubectl autoscale rs data-service-worker --cpu-percent=80 --min=1 --max="$num_kube_workers" >> "$logfile" 2>&1; then
       echo_success
     else
       echo_failure
@@ -427,10 +427,10 @@ deploy_tfdata_service () {
     echo -n "Connecting to WeaveNet..."
     
     # reset command may fail if we launch it for the first time, but doesn't matter for user
-    sudo weave reset > "$logfile" 2>&1
+    sudo weave reset >> "$logfile" 2>&1
 
-    if sudo weave launch --ipalloc-range 100.96.0.0/11 "$kube_dispatcher_ip" > "$logfile" 2>&1 \
-      && sudo weave expose > "$logfile" 2>&1; then
+    if sudo weave launch --ipalloc-range 100.96.0.0/11 "$kube_dispatcher_ip" >> "$logfile" 2>&1 \
+      && sudo weave expose >> "$logfile" 2>&1; then
       echo_success
     else
       echo_failure
@@ -449,7 +449,7 @@ stop_tfdata_service () {
   for service in "${services_arr[@]}"
   do
     echo -n "Deleting HPA $service..."
-    if kubectl delete hpa "$service" > "$logfile" 2>&1; then
+    if kubectl delete hpa "$service" >> "$logfile" 2>&1; then
       echo_success
     else
       echo_failure
@@ -459,8 +459,8 @@ stop_tfdata_service () {
   for service in "${services_arr[@]}"
   do
     echo -n "Stopping $service..."
-    if kubectl delete rs "$service" > "$logfile" 2>&1 \
-      && kubectl delete service "$service"  > "$logfile" 2>&1; then
+    if kubectl delete rs "$service" >> "$logfile" 2>&1 \
+      && kubectl delete service "$service"  >> "$logfile" 2>&1; then
       echo_success
     else
       echo_failure
@@ -473,7 +473,7 @@ stop_tfdata_service () {
   for service in "${services_arr[@]}"
   do
     echo -n "Deleting pod $service..."
-    if kubectl delete pod "$service" > "$logfile" 2>&1; then
+    if kubectl delete pod "$service" >> "$logfile" 2>&1; then
       echo_success
     else
       echo_failure
@@ -487,6 +487,8 @@ install_dependencies () {
   pip3 install yq > /dev/null 2>&1
   pip3 install -r ../resnet/requirements.txt > /dev/null 2>&1
   [[ ! -d tmp/ ]] && mkdir -p tmp/
+  sudo curl -L git.io/weave -o /usr/local/bin/weave > /dev/null 2>&1
+  sudo chmod a+x /usr/local/bin/weave > /dev/null 2>&1
 }
 
 install_dependencies
