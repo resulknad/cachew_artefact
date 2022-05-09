@@ -428,6 +428,19 @@ stop_tfdata_service () {
       echo_failure
     fi
   done 
+
+  services=$(kubectl get pods | grep data-service | awk '{print $1}')
+  readarray -t services_arr <<<"$services"
+  
+  for service in "${services_arr[@]}"
+  do
+    echo -n "Stopping $service..."
+    if kubectl delete pod "$service" > "$logfile" 2>&1; then
+      echo_success
+    else
+      echo_failure
+    fi
+  done 
 }
 
 install_dependencies () {
