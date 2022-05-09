@@ -42,8 +42,10 @@ function run_one {(
   scale_policy=${4}
 
   # Run the experiment
-  if [[ -n $scale_policy ]]; then
+  if [[ "$scale_policy" == "1" ]]; then
     experiment_dir=${log_dir}/autoscale/run_${run}
+  elif [[ "$scale_policy" == "HPA" ]]; then
+    experiment_dir=${log_dir}/autoscale_hpa/run_${run}
   else
     experiment_dir=${log_dir}/${scale}_workers/run_${run}
   fi
@@ -76,9 +78,16 @@ function start_cluster {(
   local cache_policy=${2}
   local scale_policy=${3}
 
+  enable_hpa=""
+  if [[ "$scale_policy" == "HPA" ]]; then
+    scale_policy="2"
+    enable_hpa="-a"
+  fi
+
+
   echo "Deploying service with ${workers} workers..."
   sed "s/cache_policy:[ \t]\+[0-9]\+/cache_policy: $cache_policy/g" "${service_loc}/default_config.yaml" > ${service_loc}/temp_config.yaml
-  ./manage_cluster.sh restart_service -s ${scale_policy} -w ${workers} -f ${service_loc}/temp_config.yaml
+  ./manage_cluster.sh restart_service -s ${scale_policy} ${enable_hpa} -w ${workers} -f ${service_loc}/temp_config.yaml
   echo "Done deploying service!"
 )}
 
@@ -139,25 +148,33 @@ function run_many {(
   cd ${current_dir}
 )}
 
-# Run the experiments
-run_many "${mode}" "${scale}" "${runs}"
+if false; then
+  # Run the experiments
+  run_many "${mode}" "${scale}" "${runs}"
 
-current_dir=$( pwd )
-cd ${service_loc}
+  current_dir=$( pwd )
+  cd ${service_loc}
 
-echo "Run autoscaling mode..."
-start_cluster "8" "2" "1"
+  echo "Run Cachew autoscaling mode..."
+  start_cluster "8" "2" "1"
+  update_dispatcher
+  run_one "1" "8" "${service_loc}/temp_config.yaml" "1"
+
+
+  cd ${current_dir}
+
+  {
+    echo "workers,epoch_time"
+    grep -r "TimeHistory" "${log_dir}" --exclude-dir "*autoscale*" | sed 's/.*\/\([0-9]*\)_workers.*TimeHistory: \([0-9\.]*\).*/\1,\2/g'
+  } > "${log_dir}"/epochs.csv
+
+  grep -r "request: " "${log_dir}" | sed 's/.*request: \([0-9]*\)/\1/g' > "${log_dir}"/cachew_decision.txt
+
+  python plot.py "${log_dir}"
+fi
+
+
+echo "Run Kubernetes HPA autoscaling mode..."
+start_cluster "8" "2" "HPA"
 update_dispatcher
-run_one "1" "8" "${service_loc}/temp_config.yaml" "1"
-
-
-cd ${current_dir}
-
-{
-  echo "workers,epoch_time"
-  grep -r "TimeHistory" "${log_dir}" --exclude-dir "*autoscale*" | sed 's/.*\/\([0-9]*\)_workers.*TimeHistory: \([0-9\.]*\).*/\1,\2/g'
-} > "${log_dir}"/epochs.csv
-
-grep -r "request: " "${log_dir}" | sed 's/.*request: \([0-9]*\)/\1/g' > "${log_dir}"/cachew_decision.txt
-
-python plot.py "${log_dir}"
+run_one "1" "8" "${service_loc}/temp_config.yaml" "HPA"
