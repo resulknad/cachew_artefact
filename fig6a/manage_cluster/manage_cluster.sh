@@ -327,7 +327,7 @@ tfdata_service_pods_running () {
 }
 
 deploy_tfdata_service () {
-  echo -n "Creating services and interfaces..."
+  echo -n "Creating services and interfaces (${num_tfdata_workers} workers)..."
   echo $'disp_port: 31000\nworkers:' > tmp/inp.yaml
   for (( i=0; i<num_tfdata_workers; i++ )); do
     echo "- index: $i" >> tmp/inp.yaml
