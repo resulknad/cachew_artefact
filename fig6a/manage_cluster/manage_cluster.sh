@@ -435,6 +435,15 @@ deploy_tfdata_service () {
     else
       echo_failure
     fi
+
+    echo -n "Deploying metrics-server..."
+    if kubectl apply -f ./templates/metrics-server.yaml >> "$logfile" 2>&1; then
+      echo_success
+    else
+      echo_failure
+    fi
+
+
   fi
 }
 
@@ -446,11 +455,13 @@ stop_tfdata_service () {
   
   for service in "${services_arr[@]}"
   do
-    echo -n "Deleting HPA $service..."
-    if kubectl delete hpa "$service" >> "$logfile" 2>&1; then
-      echo_success
-    else
-      echo_failure
+    if [[ -n "$service" ]]; then
+      echo -n "Deleting HPA $service..."
+      if kubectl delete hpa "$service" >> "$logfile" 2>&1; then
+        echo_success
+      else
+        echo_failure
+      fi
     fi
   done 
 
