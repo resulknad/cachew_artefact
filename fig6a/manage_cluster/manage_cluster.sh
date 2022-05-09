@@ -489,8 +489,20 @@ stop_tfdata_service () {
   for service in "${services_arr[@]}"
   do
     echo -n "Stopping $service..."
-    if kubectl delete rs "$service" >> "$logfile" 2>&1 \
-      && (kubectl delete service "$service"  >> "$logfile" 2>&1); then
+      if (kubectl delete service "$service"  >> "$logfile" 2>&1); then
+      echo_success
+    else
+      echo_failure
+    fi
+  done 
+
+  services=$(kubectl get rs | grep data-service | awk '{print $1}')
+  readarray -t services_arr <<<"$services"
+  
+  for service in "${services_arr[@]}"
+  do
+    echo -n "Deleting ReplicaSet $service..."
+    if kubectl delete rs "$service" >> "$logfile" 2>&1; then
       echo_success
     else
       echo_failure
