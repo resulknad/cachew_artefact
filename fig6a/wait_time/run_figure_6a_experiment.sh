@@ -180,6 +180,6 @@ cd ${service_loc}
 echo "Run Kubernetes HPA autoscaling mode..."
 start_cluster "8" "2" "HPA"
 update_dispatcher
-run_one "1" "8" "${service_loc}/temp_config.yaml" "HPA"
+run_one "1" "1" "${service_loc}/temp_config.yaml" "HPA"
 
 cd ${current_dir}
