@@ -429,7 +429,7 @@ deploy_tfdata_service () {
     # reset command may fail if we launch it for the first time, but doesn't matter for user
     sudo weave reset > "$logfile" 2>&1
 
-    if sudo weave launch --ipalloc-range "$kube_dispatcher_ip" > "$logfile" 2>&1 \
+    if sudo weave launch --ipalloc-range 100.96.0.0/11 "$kube_dispatcher_ip" > "$logfile" 2>&1 \
       && sudo weave expose > "$logfile" 2>&1; then
       echo_success
     else
