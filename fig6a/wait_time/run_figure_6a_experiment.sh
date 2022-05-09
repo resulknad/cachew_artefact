@@ -87,7 +87,7 @@ function start_cluster {(
 
   echo "Deploying service with ${workers} workers..."
   sed "s/cache_policy:[ \t]\+[0-9]\+/cache_policy: $cache_policy/g" "${service_loc}/default_config.yaml" > ${service_loc}/temp_config.yaml
-  ./manage_cluster.sh restart_service -s ${scale_policy} ${enable_hpa} -w ${workers} -f ${service_loc}/temp_config.yaml
+  ./manage_cluster.sh restart_service -s ${scale_policy} "${enable_hpa}" -w ${workers} -f ${service_loc}/temp_config.yaml
   echo "Done deploying service!"
 )}
 
@@ -174,7 +174,12 @@ if false; then
 fi
 
 
+current_dir=$( pwd )
+cd ${service_loc}
+
 echo "Run Kubernetes HPA autoscaling mode..."
 start_cluster "8" "2" "HPA"
 update_dispatcher
 run_one "1" "8" "${service_loc}/temp_config.yaml" "HPA"
+
+cd ${current_dir}
