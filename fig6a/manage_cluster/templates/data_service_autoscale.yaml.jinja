@@ -88,7 +88,7 @@ spec:
         - "--port={{ w.port }}"
         - "--is_dispatcher=false"
         - "--dispatcher_address={{ dispatcher_ip }}:{{ disp_port }}"
-        - "--worker_address=$MY_POD_IP:{{ w.port }}"
+        - "--worker_address=$(MY_POD_IP):{{ w.port }}"
         - "--worker_port={{ w.port }}"
         - "--vlog={{ vlog }}"
         - "--worker_heartbeat_interval_ms={{ worker_heartbeat_interval_ms }}"

@@ -354,6 +354,7 @@ deploy_tfdata_service () {
   fi
   kube_worker_names=$(get_kube_tfdata_workers) 
   kube_dispatcher_name=$(get_kube_dispatcher)
+  kube_dispatcher_ip=$(get_internal_ip "$(get_kube_dispatcher)")
   readarray -t worker_names_array <<<"$kube_worker_names"
   
   num_kube_workers=$(echo "$kube_worker_names" | wc -l)
@@ -401,6 +402,15 @@ deploy_tfdata_service () {
     echo_failure
   fi
 
+  if [[ -n $kubernetes_hpa ]]; then
+    echo -n "Creating Kubernetes HPA..."
+    if kubectl autoscale rs data-service-worker --cpu-percent=80 --min=1 --max="$num_kube_workers" > "$logfile" 2>&1; then
+      echo_success
+    else
+      echo_failure
+    fi
+  fi
+
   echo -n "Waiting for Cachew to come up..."
   timeout=0
   until tfdata_service_pods_running; do
@@ -412,6 +422,20 @@ deploy_tfdata_service () {
     sleep 5
   done
   echo_success
+
+  if [[ -n $kubernetes_hpa ]]; then
+    echo -n "Connecting to WeaveNet..."
+    
+    # reset command may fail if we launch it for the first time, but doesn't matter for user
+    sudo weave reset > "$logfile" 2>&1
+
+    if sudo weave launch --ipalloc-range "$kube_dispatcher_ip" > "$logfile" 2>&1 \
+      && sudo weave expose > "$logfile" 2>&1; then
+      echo_success
+    else
+      echo_failure
+    fi
+  fi
 }
 
 stop_tfdata_service () {
@@ -434,8 +458,21 @@ stop_tfdata_service () {
   
   for service in "${services_arr[@]}"
   do
-    echo -n "Stopping $service..."
+    echo -n "Deleting pod $service..."
     if kubectl delete pod "$service" > "$logfile" 2>&1; then
+      echo_success
+    else
+      echo_failure
+    fi
+  done 
+
+  services=$(kubectl get hpa | grep data-service | awk '{print $1}')
+  readarray -t services_arr <<<"$services"
+  
+  for service in "${services_arr[@]}"
+  do
+    echo -n "Deleting HPA $service..."
+    if kubectl delete hpa "$service" > "$logfile" 2>&1; then
       echo_success
     else
       echo_failure
