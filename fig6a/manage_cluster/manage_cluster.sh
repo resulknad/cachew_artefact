@@ -314,6 +314,12 @@ setup_kubernetes_nodes () {
 
 }
 
+metrics_server_running () {
+  # there must be some data-service pods
+  # and they must be running
+  (! kubectl get deployment metrics-server -n kube-system | awk '/metrics-server/ && /0\/1/' | grep -q . )
+}
+
 tfdata_service_pods_running () {
   # there must be some data-service pods
   # and they must be running
@@ -442,6 +448,18 @@ deploy_tfdata_service () {
     else
       echo_failure
     fi
+
+    echo -n "Waiting for metrics-server to come up..."
+    until metrics_server_running; do
+      timeout=$((timeout + 1))
+      if (( timeout > 20 )); then
+        echo_failure
+        return
+      fi
+      sleep 5
+    done
+    echo_success
+
 
 
   fi
